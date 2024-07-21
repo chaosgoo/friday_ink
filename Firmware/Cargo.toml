@@ -1,0 +1,57 @@
+workspace = { members = ["u8g2_rs"] }
+[package]
+name = "friday_rs"
+version = "2.0.0"
+edition = "2021"
+# build = "build.rs"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+bindgen = "0.65"
+cc = "1.0"
+
+[dependencies]
+ch58x = { version = "0.3.0", features = ["ch58x", "rt"] }
+ch58x-hal = { path = "./ch58x-hal" }
+u8g2_rs = { path = "./u8g2_rs" }
+
+
+fugit = "0.3.7"
+nb = "1.1.0"
+embedded-hal-02 = { package = "embedded-hal", version = "0.2.7", features = [
+    "unproven",
+] }
+embedded-hal-1 = { version = "1.0.0-rc.2", package = "embedded-hal" }
+embedded-hal-nb = "1.0.0"
+embedded-hal-async = "1.0.0"
+
+
+embassy-sync = { version = "0.5.0", optional = true }
+embassy-time = { version = "0.3.0" }
+embassy-futures = "0.1.1"
+embassy-executor = { version = "0.5.0", features = [
+    # "nightly",
+    "integrated-timers",
+    "arch-riscv32",
+    "executor-thread",
+] }
+
+qingke = { version = "0.1.7", features = ["critical-section-impl"] }
+qingke-rt = { version = "0.1.7", features = ["highcode"] }
+panic-halt = "0.2.0"
+chrono = { version = "0.4.31", default-features = false }
+
+[features]
+default = ["ble", "embassy"]
+embassy = ["dep:embassy-sync"]
+ble = []
+power_measure = []
+
+[dev-dependencies]
+
+[profile.release]
+# panic = "unwind"
+panic = "abort"
+opt-level = "z"
+lto = true
+codegen-units = 1

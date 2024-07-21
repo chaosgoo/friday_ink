@@ -1,0 +1,21 @@
+[build]
+target = "riscv32imac-unknown-none-elf"
+
+[alias]
+run-demo = "run --release --example"
+
+[target.riscv32imac-unknown-none-elf]
+runner = "wchisp flash"
+# runner = "wlink -v flash --dry-run"
+# runner = "wlink -v flash"
+# runner = "wlink -v flash --watch-serial"
+
+# runner = "probe-rs run --chip CH582 --chip-description-path definition.yaml"
+
+rustflags = [
+    # "-C", "link-arg=-Tmemory.x",
+    "-C",
+    "link-arg=-Tlink.x",
+    # "--emit", "obj",
+    # "--emit", "asm",
+]

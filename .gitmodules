@@ -1,0 +1,6 @@
+[submodule "Firmware/ch58x-hal"]
+	path = Firmware/ch58x-hal
+	url = git@github.com:vjspdhpp/ch58x-hal.git
+[submodule "Firmware/u8g2_rs/u8g2"]
+	path = Firmware/u8g2_rs/u8g2
+	url = git@github.com:vjspdhpp/u8g2.git
