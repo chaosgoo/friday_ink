@@ -1,4 +1,8 @@
 # 今天是周五吗
+
+[bilibili视频介绍](https://www.bilibili.com/video/BV1gf8TerEiX)
+[MakerWorld地址](https://makerworld.com.cn/zh/models/375640)
+
 Top | Bottom
 -|-
 <img src="./Image/frontview.jpg" width=320 title="时间同步模式的显示内容"/> | <img src="./Image/backview.png" width=320 title="时间同步模式的显示内容"/>
@@ -36,7 +40,7 @@ Top | Bottom
 ## 时间校准说明
 开机时候长按按钮, 进入时间同步模式, 并在看见如下图后松开按钮
 
-<img src="./Image/bluetoothMode.bmp" width=200 title="时间同步模式的显示内容"/>
+<img src="./Image/bluetoothMode.png" width=200 title="时间同步模式的显示内容"/>
 
 此时装置将会搜索周围的蓝牙广播.当搜索到符合约定格式的时间广播适合会自动重启.
 
@@ -47,11 +51,11 @@ Top | Bottom
 当进入时间同步模式后20s内无法搜索到符合要求的时间广播,会自动退出同步.
 
 
-## 编译准备
+## 编译及烧录
 推荐在Linux环境下进行编译, 这里我使用的是WSL2内的ubuntu子系统.
 1. clone 本项目, cd进入后执行`git submodule update --init --recursive`
 2. 安装Rust
-3. 跟着[riscv-gnu-toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain)仓库的说明安装risc-v工具链
+3. 跟着[riscv-gnu-toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain)仓库的Release界面下载riscv32-elf-ubuntu-22.04-gcc-nightly,配置好环境变量
 4. 根据你的MRS_Community配置u8g2_rs内的build.rs中头文件目录
 5. 执行`cargo build-hex`获得编译好的hex文件
 6. 使用WCHISPStudio工具串口模式下载得到的hex文件
