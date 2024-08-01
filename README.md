@@ -66,3 +66,11 @@ Top | Bottom
 <img src="./Image/BackViewInFusion.png" width=640/>
 <img src="./Image/PCBATop.png" width=640/>
 <img src="./Image/PCBABottom.png" width=640/>
+
+## Q&A
+
+### Q: 时间校准时候卡在校准页怎么办
+### A: 推荐提前发送时间广播, 让手机和装置足够接近. 然后装置进入校准, 并在发现20S后未能自动退出校准或按钮无法强制退出校准时, 取下电池, 重新安装电池.
+
+## 已知问题
+* 时间校准有一定概率卡死在校准页
