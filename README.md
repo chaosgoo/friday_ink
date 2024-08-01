@@ -29,12 +29,20 @@ Top | Bottom
 * DCDC芯片 SGM6603-3.3YN6G
 * 电源 CR2032电池
 
+#### 注: 
+* 当使用屏幕驱动IC为SSD1607时候, **需要焊接SGM6603**, 因为需要借助SGM6603来彻底断开墨水屏供电
+    * 这块屏幕是我从闲鱼上捡来的, 买回来发现和合宙9.9块钱的墨水屏丝印一样, 驱动IC也一样.
+    * 在实际使用时候,休眠状态下功耗始终降低不下来. 于是我一怒之下怒一下了, 加了个DCDC来管理墨水瓶的供电. 有效的将他的休眠电流从70μA降低到了3μA
+* 当使用屏幕驱动IC为SSD1681时候, **不需要焊接SGM6603**, 此时使用0欧电阻短接SGM6603的Pin5和Pin6, 并且无需焊接SGM6603下方4.7μH的电感
+    * 这是目前中景园在售的黑白双色电子墨水屏, 显示效果比我在咸鱼上买的效果好很多. 虽然分辨率同为200x200,但就是效果清晰, 对比度也好, 缺点就是比我咸鱼上5块钱买的贵.
+    * 由于能够正常休眠,所以不需要DCDC了, 功耗表现稍微比SSD1607版本好一丢丢
+
 ### 尺寸
 * 34mm×39mm×8mm
 
 ### 耗电信息
 * 休眠状态下≈3μA
-* 刷新 10~20mA, 持续5秒后会立刻进入休眠
+* 刷新 10~20mA, 刷新完毕后会立刻进入休眠
 
 
 ## 时间校准说明
@@ -57,8 +65,9 @@ Top | Bottom
 2. 安装Rust
 3. 跟着[riscv-gnu-toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain)仓库的Release界面下载riscv32-elf-ubuntu-22.04-gcc-nightly,配置好环境变量
 4. 根据你的MRS_Community配置u8g2_rs内的build.rs中头文件目录
-5. 执行`cargo build-hex`获得编译好的hex文件
-6. 使用WCHISPStudio工具串口模式下载得到的hex文件
+5. 根据屏幕类型,修改main.rs中创建屏幕的参数
+6. 执行`cargo build-hex`获得编译好的hex文件
+7. 使用WCHISPStudio工具串口模式下载得到的hex文件
 
 
 ## 设定集
@@ -74,3 +83,10 @@ Top | Bottom
 
 ## 已知问题
 * 时间校准有一定概率卡死在校准页
+* FPC座HC-FPC-05-09-24RLTAG和我自己在淘宝买的不一样, 但是接触更加牢靠.代价是墨水屏排线超出PCB范围了
+
+## 参考资料
+
+* [ch58x-hal](https://github.com/ch32-rs/ch58x-hal)
+* CH582F原理图参考azunya的[纽扣电池蓝牙温湿度计CR1220+CH592F+SHT40](https://oshwhub.com/azunya/ch592f-cr1220)
+* SSD1681的驱动来自pikot的[U8g2_Arduino](https://github.com/pikot/U8g2_Arduino.git)
