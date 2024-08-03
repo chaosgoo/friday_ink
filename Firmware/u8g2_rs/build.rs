@@ -34,6 +34,7 @@ fn main() {
         "u8g2/csrc/u8x8_cad.c",
         "u8g2/csrc/u8x8_capture.c",
         "u8g2/csrc/u8x8_d_ssd1607_200x200.c",
+        "u8g2/csrc/u8x8_d_ssd1681_200x200.c",
         "u8g2/csrc/u8x8_debounce.c",
         "u8g2/csrc/u8x8_display.c",
         "u8g2/csrc/u8x8_fonts.c",

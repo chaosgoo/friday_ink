@@ -11,11 +11,10 @@ use ch58x_hal::{println, uart::UartTx};
 use embassy_executor::Spawner;
 use embassy_time::{Duration, Timer};
 use friday_rs::bluetooth::{observer_task, observer_task_init, observer_timeout_task};
-use friday_rs::display::{u8x8_byte_ch582f_hw_spi, u8x8_gpio_and_delay_ch582f, Display};
+use friday_rs::display::{u8x8_byte_ch582f_hw_spi, u8x8_gpio_and_delay_ch582f, Display, DriverIC};
 use friday_rs::rtc::set_default_rtc;
 use friday_rs::softwire::SoftwareI2C;
 use friday_rs::{config, power, rtc};
-use qingke::riscv;
 
 #[panic_handler]
 fn panic(info: &core::panic::PanicInfo) -> ! {
@@ -77,13 +76,12 @@ async fn main(spawner: Spawner) -> ! {
         set_default_rtc(RTC_INSTANCE.as_mut().unwrap());
     }
 
-    let mut display = unsafe {
-        Display::new(
-            &u8g2_rs::u8g2_cb_r3,
-            Some(u8x8_byte_ch582f_hw_spi),
-            Some(u8x8_gpio_and_delay_ch582f),
-        )
-    };
+    // 按需选择屏幕驱动
+    let mut display = Display::new(
+        DriverIC::SSD1607,
+        Some(u8x8_byte_ch582f_hw_spi),
+        Some(u8x8_gpio_and_delay_ch582f),
+    );
 
     display.init();
     display.set_power_save(false);
@@ -133,8 +131,9 @@ async fn main(spawner: Spawner) -> ! {
         }
     }
     // waiting for epd draw done.
-    ch58x_hal::delay_ms(1000u16);
+    // ch58x_hal::delay_ms(5000u16);
     display.set_power_save(true);
+    // ch58x_hal::delay_ms(10u16);
     match boot_mode {
         FridayMode::Normal => {
             println!("Enter SLEEP");

@@ -1,8 +1,11 @@
 workspace = { members = ["u8g2_rs"] }
 [package]
 name = "friday_rs"
-version = "2.0.0"
+version = "2.0.1"
 edition = "2021"
+authors = ["Chaosgoo", "Chaosgoo <admin@chaosgoo.com>"]
+license = "GPL-3.0 license"
+keywords = ["calendar", "epaper", "embedded"]
 # build = "build.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

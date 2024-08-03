@@ -6,7 +6,7 @@ use core::slice;
 
 use crate::assets;
 use crate::rtc::Time;
-use ch58x_hal::gpio::{AnyPin, Level, Output, OutputDrive};
+use ch58x_hal::gpio::{AnyPin, Input, Level, Output, OutputDrive, Pin, Pull};
 use ch58x_hal::println;
 use ch58x_hal::spi::{BitOrder, Spi};
 use ch58x_hal::{peripherals, prelude::*};
@@ -22,6 +22,11 @@ use core::fmt::{self};
 pub const U8X8_MSG_GPIO_CS: u32 = 73;
 pub const U8X8_MSG_GPIO_DC: u32 = 74;
 pub const U8X8_MSG_GPIO_RESET: u32 = 75;
+
+pub enum DriverIC {
+    SSD1607,
+    SSD1681,
+}
 
 pub struct StringWriter {
     buffer: [u8; 32],
@@ -132,15 +137,31 @@ pub unsafe extern "C" fn u8x8_gpio_and_delay_ch582f(
             }
         }
         U8X8_MSG_DELAY_100NANO => {
-            for _ in 0..=100 {
+            for _ in 0..=2000 {
                 riscv::asm::nop();
             }
         }
         U8X8_MSG_DELAY_10MICRO => {
-            ch58x_hal::delay_ms(10);
+            ch58x_hal::delay_ms(1);
         }
         U8X8_MSG_DELAY_MILLI => {
-            ch58x_hal::delay_ms(arg_int.into());
+            // TODO 理论上说1681需要借助Busy脚去检测状态
+            let busy = Input::new(peripherals::PA4::steal().degrade(), Pull::Up);
+            let mut max_delay: u16 = arg_int.into();
+            let busy_level = match display.driver_ic {
+                DriverIC::SSD1607 => Level::High,
+                DriverIC::SSD1681 => Level::High,
+            };
+            while busy.get_level() == busy_level {
+                println!("wait for busy low");
+                if max_delay > 0 {
+                    ch58x_hal::delay_ms(max_delay);
+                    max_delay -= 1;
+                } else {
+                    break;
+                }
+            }
+            // ch58x_hal::delay_ms(arg_int.into());
         }
         U8X8_MSG_GPIO_CS => {
             if arg_int == 0 {
@@ -175,17 +196,32 @@ pub struct Display<'d> {
     pub res: Output<'d, AnyPin>,
     pub cs: Output<'d, AnyPin>,
     pub en: Output<'d, AnyPin>,
+    driver_ic: DriverIC,
 }
 
 impl<'d> Display<'d> {
-    pub fn new(
-        rotation: *const u8g2_cb_t,
-        byte_cb: u8x8_msg_cb,
-        gpio_and_delay_cb: u8x8_msg_cb,
-    ) -> Self {
+    pub fn new(driver_ic: DriverIC, byte_cb: u8x8_msg_cb, gpio_and_delay_cb: u8x8_msg_cb) -> Self {
         let mut u8g2: u8g2_t = unsafe { core::mem::zeroed() };
         unsafe {
-            u8g2_Setup_ssd1607_ws_200x200_f(&mut u8g2, rotation, byte_cb, gpio_and_delay_cb);
+            let rotation = &u8g2_rs::u8g2_cb_r3;
+            match driver_ic {
+                DriverIC::SSD1607 => {
+                    u8g2_Setup_ssd1607_gd_200x200_f(
+                        &mut u8g2,
+                        rotation,
+                        byte_cb,
+                        gpio_and_delay_cb,
+                    );
+                }
+                DriverIC::SSD1681 => {
+                    u8g2_Setup_ssd1681_zjy_200x200_f(
+                        &mut u8g2,
+                        rotation,
+                        byte_cb,
+                        gpio_and_delay_cb,
+                    );
+                }
+            }
         }
 
         let mut spi_config = ch58x_hal::spi::Config::default();
@@ -229,6 +265,7 @@ impl<'d> Display<'d> {
             dc,
             res,
             cs,
+            driver_ic,
         }
     }
 
@@ -245,12 +282,22 @@ impl<'d> Display<'d> {
         }
     }
 
+    //000101
     pub fn set_power_save(&mut self, enable: bool) {
         if enable {
             self.en.set_low();
             unsafe { u8x8_SetPowerSave(&mut self.u8g2.borrow_mut().u8x8, 1) };
             self.cs.set_low();
-            self.res.set_low();
+            match self.driver_ic {
+                DriverIC::SSD1607 => {
+                    self.res.set_low();
+                    let _ = Input::new(unsafe { peripherals::PA4::steal().degrade() }, Pull::None);
+                }
+                DriverIC::SSD1681 => {
+                    self.res.set_high();
+                    let _ = Input::new(unsafe { peripherals::PA4::steal().degrade() }, Pull::Up);
+                }
+            }
         } else {
             self.en.set_high();
             unsafe { u8x8_SetPowerSave(&mut self.u8g2.borrow_mut().u8x8, 0) };
